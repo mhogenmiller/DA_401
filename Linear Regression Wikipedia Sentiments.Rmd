@@ -1,0 +1,34 @@
+---
+title: "Wikipedia Analysis"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+
+# Plotting sentiment v. weeks #
+#import csv
+Wikipedia=read.csv('/Users/morganhogenmiller/Desktop/GitHub/DA_401/Wikipedia_Data.csv')
+
+#log transform 
+Wikipedia$weekT <- log(Wikipedia$Weeks)
+Wikipedia$weekT10 <- log10(Wikipedia$Weeks)
+
+Wikipedia
+model=lm(weekT~Sentimentality,Wikipedia)
+summary(model)
+#linear model
+```
+
+```{r}
+ggplot(data = Wikipedia, aes(x = Sentimentality, y = weekT)) + 
+  geom_point(color='blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  ylab('Week (log transformed)') + 
+  ggtitle('Sentimentality v. Week') +
+  theme_bw() + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_point(color='purple')
+  
+```
+
