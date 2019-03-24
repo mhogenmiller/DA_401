@@ -1,0 +1,40 @@
+---
+title: "Linear Regression Google Headlines"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+
+# Plotting sentiment v. weeks #
+#import csv
+GH=read.csv('/Users/morganhogenmiller/Desktop/GitHub/DA_401/google_headlines.csv')
+
+#log transform 
+GH$weekT <- log(GH$Weeks)
+GH$weekT10 <- log10(GH$Weeks)
+
+Wikipedia
+model=lm(weekT~Sentimentality,GH)
+summary(model)
+
+boxplot(GH$Sentimentality) #making a box plot to examine outliers
+outliers<- boxplot(GH$Sentimentality)$out
+outliers
+GH[which(GH$Sentimentality %in% outliers),]
+GH <- GH[-which(GH$Sentimentality %in% outliers),]
+
+#linear model
+```
+
+```{r}
+ggplot(data = GH, aes(x = Sentimentality, y = weekT)) + 
+  geom_point(color='blue') +
+  geom_smooth(method = "lm", se = FALSE) +
+  ylab('Week (log transformed)') + 
+  ggtitle('Sentimentality v. Week') +
+  theme_bw() + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  geom_point(color='purple')
+  
+```

@@ -10,11 +10,11 @@ library(ggplot2)
 #import csv
 Wikipedia=read.csv('/Users/morganhogenmiller/Desktop/GitHub/DA_401/Wikipedia_Data.csv')
 
+
 #log transform 
 Wikipedia$weekT <- log(Wikipedia$Weeks)
 Wikipedia$weekT10 <- log10(Wikipedia$Weeks)
 
-Wikipedia
 model=lm(weekT~Sentimentality,Wikipedia)
 summary(model)
 #linear model
