@@ -1,0 +1,278 @@
+---
+title: "Visuals 401"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Visual 1: Variable Distributions ###
+##DO EVERYTHING AGAIN WITH WEEKS!!!##
+
+```{r}
+#Importing Braodway_Avg
+setwd('/Users/morganhogenmiller/Desktop/GitHub/DA_401/Data sets')
+df=read.csv('Broadway_Avg.csv')
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+library(plyr)
+library(doBy)
+library(survival)
+library(survminer)
+colnames(df)
+#Remove NA value from 
+df=df[!(df$Category==0),]
+df=na.omit(df, cols="LogWeeks")
+colnames(df)
+```
+
+```{r Distribution of Weeks for Methods section}
+
+ggplot(data=df, aes(Weeks)) + geom_density(fill='black') +ggtitle('Distribution of Total Weeks on Braodway') +xlab('Total Number of Weeks Show Survived')+ylab('Density') + theme(plot.title = element_text(hjust = 0.5))
+
+summary(df$Weeks)
+```
+
+
+# Making Visuals for the Results section of the paper #
+
+
+
+
+#Visual 1: Density plots#
+
+```{r Density Plots for each variable of interest }
+# Multiple histograms
+#First, have to melt the data so that it sees each columns as calues in the variable column and their values in a seperate column
+df_bw=df[c(3,4,6,9,22)]
+melt.df <- melt(df_bw)
+
+#Creating figure with multiple columns
+ggplot(data = melt.df, aes(x = value)) + 
+stat_density() + 
+facet_wrap(~variable, scales = "free")  
+```
+
+
+
+```{r}
+
+#First, have to melt the data so that it sees each columns as calues in the variable column and their values in a seperate column
+#taking log of the total Tonys to normalize it
+
+df$Tonytotal <- log(df$Tonytotal) #what to do about this?
+#GH$weekT10 <- log10(GH$Weeks)
+
+df_color=df[c(11,14,15,21)]
+melt.df <- melt(df_color)
+
+#Creating figure with multiple columns
+ggplot(data = melt.df, aes(x = value)) + 
+stat_density(fill='purple') + 
+facet_wrap(~variable, scales = "free")  
+
+```
+
+# ANOVA #
+
+```{r ANOVA}
+#ANOVA WIkipedia#
+
+#First, visualize the data to see the mean and sd
+library(dplyr)
+
+group_by(df, Category) %>%
+  summarise(
+    mean = mean(LogWeeks, na.rm = TRUE),
+    sd = sd(LogWeeks, na.rm = TRUE)
+  )
+```
+```{r}
+#Boxplot of each sentiment category and the week distribution
+ggplot(df, aes(Category, LogWeeks)) +
+        geom_boxplot()
+```
+
+As seen in the boxplot, there is an outlier in both the negtive and neutral category.
+
+
+```{r ANOVA}
+# Compute the analysis of variance
+res.aov <- aov(LogWeeks ~ Category, data = df)
+# Summary of the analysis
+summary(res.aov)
+```
+
+The ANOVA test results show that there is a significant difference between the means for each category but does not explicitly state where the difference lies.
+
+```{r ANOVA}
+TukeyHSD(res.aov)
+```
+
+From the multiple pair-wise comparison above, we can see that the difference in longevity between Wikipedia sentiment categories is significant between the positive and megative categories and the positive and neutral categories. 
+
+
+
+```{r ANOVA}
+##Checking the honogeneity of variance assumption ##
+plot(res.aov, 1)
+
+library(car)
+leveneTest(LogWeeks ~ Category, data = df)
+```
+There does not seem to be a relationship between the fitted and residual values, so this assumption of the ANOVA test is met. 
+
+```{r ANOVA}
+## Checking the normality of resilduals assumption ##
+plot(res.aov, 2)
+```
+
+The residuals are relatively normal, meaning that the normality assumption is met.
+
+```{r ANOVA}
+# Extract the residuals
+aov_residuals <- residuals(object = res.aov )
+# Run Shapiro-Wilk test
+shapiro.test(x = aov_residuals )
+```
+
+##Visualizing results ###
+
+```{r ANOVA}
+# Summarizes the mean and SE of each of the categories #
+graph_summary<-ddply(df, c("Category"), summarize,
+AVERAGE=mean(LogWeeks),
+SE=sqrt(var(LogWeeks)/length(LogWeeks)))
+
+graph_summary
+
+library(ggthemes)
+ggplot(graph_summary)+
+aes(x=Category, y=AVERAGE, colour=Category)+
+geom_point()+
+geom_errorbar(aes(ymax=AVERAGE+SE, ymin=AVERAGE-SE)) +
+scale_x_discrete("Category")+
+scale_y_continuous("Mean") +ggtitle("ANOVA Results of Longevity Between Wikipedia Categories") 
+
+```
+
+
+
+
+
+###Google Headlines relationship with LogWeeks ###
+Correlation coefficients
+
+```{r}
+#Scatter plot of headlines v. weeks
+ggplot(df) + aes(x=Sentimentality, y=LogWeeks) + geom_point()
+
+#noticed potential outlier
+boxplot(df$Sentimentality)
+
+#isolating outlier
+outliers <- boxplot(df$Sentimentality, plot=FALSE)$out
+outliers
+
+#deleting outliers
+nooutliers<-df[-which(df$Sentimentality %in%outliers),]
+
+nrow(nooutliers)
+
+#Recreating the scatterplot without outliers
+ggplot(nooutliers) + aes(x=Sentimentality, y=LogWeeks) + geom_point() + ggtitle("Google Headline Sentimentality v. Longevity")  + xlab("Google Headline Sentimentality Score") + ylab("LogWeeks") + theme_minimal(base_family = 'serif') + theme(plot.title = element_text(hjust = 0.5))
+
+cor.test(nooutliers$Sentimentality, nooutliers$LogWeeks)
+```
+Not much of a correlation between the overall search traffic and the sentimentality of Google headlines.
+
+
+
+
+
+### Google Trends ###
+do the same as above with both first week ...then work to get mean from month before and after Tony
+```{r Google Trends}
+#Scatter plot of grand search mean v. weeks
+ggplot(df) + aes(x=Grand.Mean.Sentiment, y=Weeks) + geom_point()
+
+#Distribution
+boxplot(df$Grand.Mean)
+
+#Recreating the scatterplot without outliers
+ggplot(df) + aes(x=Grand.Mean, y=Weeks) + geom_point() + ggtitle("Google Trend Grand Mean v. Longevity") + theme(plot.title = element_text(hjust = 0.5)) + xlab("Google Trend Mean Search Score") + ylab("LogWeeks") + theme_minimal(base_family = 'serif') + theme(plot.title = element_text(hjust = 0.5))
+
+cor.test(df$Grand.Mean, df$Weeks)
+```
+
+```{r Google Trends}
+#Scatter plot of grand search mean v. weeks
+ggplot(df) + aes(x=First.Week, y=LogWeeks) + geom_point()
+
+#Distribution
+boxplot(df$First.Week)
+
+#Recreating the scatterplot without outliers
+ggplot(df) + aes(x=First.Week, y=LogWeeks) + geom_point() + ggtitle("Google Trend First Day Score v. Longevity") + theme(plot.title = element_text(hjust = 0.5)) + xlab("Google Trend First Day Search Score") + ylab("LogWeeks") + theme_minimal(base_family = 'serif') + theme(plot.title = element_text(hjust = 0.5))
+
+cor.test(df$First.Week, df$LogWeeks)
+```
+
+```{r Google Trends: Histograms of first and last months for shows}
+gt=read.csv('/Users/morganhogenmiller/Desktop/GitHub/DA_401/Data sets/showfirstlast.csv')
+
+#Distrubution of starting months
+
+ggplot(data = gt, aes(first.month)) + 
+geom_bar() + scale_x_discrete(name ="First Month", 
+                    limits=c(1,2,3,4,5,6,7,8,9,10,11,12)) + ylab('Frequency')+ ggtitle('Distribution of Starting Months') + theme(plot.title = element_text(hjust = 0.5))
+
+#Distribution of ending months
+ggplot(data = gt, aes(last.month)) + 
+geom_bar() + scale_x_discrete(name ="Last Month", 
+                    limits=c(1,2,3,4,5,6,7,8,9,10,11,12)) + ylab('Frequency')+ ggtitle('Distribution of Closing Months') + theme(plot.title = element_text(hjust = 0.5))
+
+
+#Overlap?
+
+# ggplot(data=gt) + 
+#   geom_histogram(aes(first.month),fill='Blue') + 
+#   geom_histogram(aes(last.month),fill='pink')+ scale_x_discrete(name ="First Month", 
+#                     limits=c(1,2,3,4,5,6,7,8,9,10,11,12)) 
+
+```
+
+
+
+
+Methods section for survival analysis
+
+
+```{r Suvival Analysis}
+
+
+#Create variable for y/n to Tony awards
+df$Tony_yn <- ifelse(df$Total.Tonys== 0,0, 1)
+
+#Recode categories from postive, negative, and neutral to 0,1,2
+df$Category <- ifelse(df$Category== "Positive",2,ifelse(df$Category== "Nagative", 0, 1))
+
+#create survival object
+surv_object <- Surv(time = df$Weeks, event = df$Censored)
+surv_object
+
+#Fitting the survival object to a Kaplan-Meir curve
+fit1 <- survfit(surv_object ~ Tony_yn, data = df)
+summary(fit1)
+
+#plot of the survival probability over time for Tony v. No Tonys
+ggsurvplot(fit1, data = df, pval = TRUE)
+
+#Proportional hazard model
+fit.coxph <- coxph(surv_object ~  Capacity.... + Performances + Sentimentality + Grand.Mean + Total.Tonys +Category + Tony.Season +First.Week ,
+                   data = df)
+ggforest(fit.coxph, data = df)
+```
+
