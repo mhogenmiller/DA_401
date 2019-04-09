@@ -10,7 +10,9 @@ How do online media outlets responses relate to the longevity of Broadway musica
 There are three main hypotheses in accordance with the research question.
 
 1 Positive synopses will correspond overwhelmingly to shows that have longer runs.
+
 2 The more positive a shows Google headlines are overall, the  longer survival time the show will have.
+
 3 Shows with the highest averages during their first weeks and post tony winning periods will have longer longevities
 
 *Results* of this study_____________________
