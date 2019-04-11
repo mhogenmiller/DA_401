@@ -1,0 +1,265 @@
+---
+title: "Visuals 401"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Visual 1: Variable Distributions ###
+##DO EVERYTHING AGAIN WITH WEEKS!!!##
+
+```{r}
+#Importing Braodway_Avg
+setwd('/Users/morganhogenmiller/Desktop/GitHub/DA_401/Data sets')
+df=read.csv('Broadway_Avg.csv')
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+library(plyr)
+library(doBy)
+library(survival)
+library(survminer)
+library(car)
+colnames(df)
+#Remove NA value from 
+df=df[!(df$Category==0),]
+df=na.omit(df, cols="LogWeeks")
+
+#Changing censoring
+df$Censored <- ifelse(df$Censored== 0,1, 0)
+
+
+
+colnames(df)[colnames(df)=="Grand.Mean"] <- "Grand.Means.GT"
+colnames(df)[colnames(df)=="First.Week"] <- "First.Mean.GT"
+colnames(df)[colnames(df)=="Capacity..."] <- "Avg % Capacity Filled"
+colnames(df)
+
+```
+
+```{r Distribution of Weeks for Methods section}
+
+ggplot(data=df, aes(Weeks)) + geom_density(fill='black') +ggtitle('Distribution of Total Weeks on Braodway') +xlab('Total Number of Weeks Show Survived')+ylab('Density') + theme(plot.title = element_text(hjust = 0.5))
+
+summary(df$Weeks)
+```
+
+
+# Making Visuals for the Results section of the paper #
+
+
+
+
+#Visual 1: Density plots#
+
+```{r Density Plots for each variable of interest }
+# Multiple histograms
+#First, have to melt the data so that it sees each columns as calues in the variable column and their values in a seperate column
+df_bw=df[c(4,9,12)]
+melt.df <- melt(df_bw)
+
+#Creating figure with multiple columns
+ggplot(data = melt.df, aes(x = value)) + 
+stat_density() + 
+facet_wrap(~variable, scales = "free")  + ggtitle('Density Plots for Broadway Original Data Set Variables of Interest') + theme(plot.title = element_text(hjust = 0.5)) + xlab('Value') + ylab('Density')
+
+
+```
+
+
+
+```{r}
+
+#First, have to melt the data so that it sees each columns as calues in the variable column and their values in a seperate column
+#taking log of the total Tonys to normalize it
+
+df_color=df[c(11,14,15,22,10,16)]
+melt.df <- melt(df_color)
+
+#Creating figure with multiple columns
+ggplot(data = melt.df, aes(x = value)) + 
+stat_density(fill='purple') + 
+facet_wrap(~variable, scales = "free") + ggtitle('Density Plots for Variables Unique to Study') + theme(plot.title = element_text(hjust = 0.5)) + xlab('Value') + ylab('Density')
+
+```
+
+
+###Google Headlines relationship with Weeks ###
+Correlation coefficients
+
+```{r}
+#Scatter plot of headlines v. weeks
+ggplot(df) + aes(x=Sentimentality, y=Weeks) + geom_point()
+
+#noticed potential outlier
+boxplot(df$Sentimentality)
+
+#isolating outlier
+outliers <- boxplot(df$Sentimentality, plot=FALSE)$out
+outliers
+
+#deleting outliers
+nooutliers<-df[-which(df$Sentimentality %in%outliers),]
+
+nrow(nooutliers)
+
+#Recreating the scatterplot without outliers
+ggplot(nooutliers) + aes(x=Sentimentality, y=Weeks) + geom_point() + ggtitle("Google Headline Sentimentality v. Longevity")  + xlab("Google Headline Sentimentality Score") + ylab("Weeks") + theme_minimal(base_family = 'serif') + theme(plot.title = element_text(hjust = 0.5))
+
+```
+Not much of a correlation between the overall search traffic and the sentimentality of Google headlines.
+
+
+
+
+
+### Google Trends ###
+do the same as above with both first week ...then work to get mean from month before and after Tony
+```{r Google Trends}
+#Scatter plot of grand search mean v. weeks
+ggplot(df) + aes(x=Grand.Means.GT, y=Weeks) + geom_point()
+
+#Distribution
+boxplot(df$Grand.Mean)
+
+#Recreating the scatterplot without outliers
+ggplot(df) + aes(x=Grand.Means.GT, y=Weeks) + geom_point() + ggtitle("Google Trend Grand Mean v. Longevity") + theme(plot.title = element_text(hjust = 0.5)) + xlab("Google Trend Mean Search Score") + ylab("Weeks") + theme_minimal(base_family = 'serif') + theme(plot.title = element_text(hjust = 0.5))
+
+cor.test(df$Grand.Mean, df$Weeks)
+```
+
+```{r Google Trends}
+#Scatter plot of grand search mean v. weeks
+ggplot(df) + aes(x=First.Mean.GT, y=Weeks) + geom_point()
+
+#Distribution
+boxplot(df$First.Mean.GT)
+
+#Recreating the scatterplot without outliers
+ggplot(df) + aes(x=First.Mean.GT, y=Weeks) + geom_point() + ggtitle("Google Trend First Day Score v. Longevity") + theme(plot.title = element_text(hjust = 0.5)) + xlab("Google Trend Avg. First Week Score") + ylab("Weeks") + theme_minimal(base_family = 'serif') + theme(plot.title = element_text(hjust = 0.5))
+
+i=lm( Weeks~Sentimentality, data=df)
+summary(i)
+```
+
+```{r Google Trends: Histograms of first and last months for shows}
+gt=read.csv('/Users/morganhogenmiller/Desktop/GitHub/DA_401/Data sets/showfirstlast.csv')
+
+#Distrubution of starting months
+
+ggplot(data = gt, aes(first.month)) + 
+geom_bar() + scale_x_discrete(name ="First Month", 
+                    limits=c(1,2,3,4,5,6,7,8,9,10,11,12)) + ylab('Frequency')+ ggtitle('Distribution of Starting Months') + theme(plot.title = element_text(hjust = 0.5))
+
+#Distribution of ending months
+ggplot(data = gt, aes(last.month)) + 
+geom_bar() + scale_x_discrete(name ="Last Month", 
+                    limits=c(1,2,3,4,5,6,7,8,9,10,11,12)) + ylab('Frequency')+ ggtitle('Distribution of Closing Months') + theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+
+Methods section for survival analysis
+
+
+```{r Suvival Analysis for Tony Award Wins}
+
+
+#Create variable for y/n to Tony awards
+df$Tony_yn <- ifelse(df$total== 0,'No', 'Yes')
+
+
+#create survival object
+surv_object <- Surv(time = df$Weeks, event = df$Censored)
+surv_object
+
+#Fitting the survival object to a Kaplan-Meir curve
+fit1 <- survfit(surv_object ~ Tony_yn, data = df)
+summary(fit1)
+
+#plot of the survival probability over time for Tony v. No Tonys
+ggsurvplot(fit1, data = df, pval = TRUE) + xlab(' Number of Weeks') + ylab('Survival Probability') + ggtitle('Survival Probabilities of Shows With and Without Tonys')
+
+```
+
+
+```{r Suvival Analysis for Tony Award Presence}
+
+
+#create survival object
+surv_object <- Surv(time = df$Weeks, event = df$Censored)
+surv_object
+
+#Fitting the survival object to a Kaplan-Meir curve
+fit1 <- survfit(surv_object ~ Tony.Season, data = df)
+summary(fit1)
+
+#plot of the survival probability over time for Tony v. No Tonys
+ggsurvplot(fit1, data = df, pval = TRUE) + xlab(' Number of Weeks') + ylab('Survival Probability') + ggtitle('Survival Probabilities of Shows In and Out of Tony Season')
+
+ggplot(data = df, aes(Tony.Season)) + 
+geom_bar()
+
+as.data.frame(table(df$Tony.Season))
+```
+
+
+```{r Suvival Analysis for Wikipedia Category}
+
+#Recode categories from postive, negative, and neutral to 0,1,2
+#df$Category <- ifelse(df$Category== "Positive",2,ifelse(df$Category== "Negative", 0, 1))
+
+#create survival object
+surv_object <- Surv(time = df$Weeks, event = df$Censored)
+surv_object
+
+#Fitting the survival object to a Kaplan-Meir curve
+fit1 <- survfit(surv_object ~ Category, data = df)
+summary(fit1)
+
+#plot of the survival probability over time for Tony v. No Tonys
+ggsurvplot(fit1, data = df, pval = TRUE) + xlab(' Number of Weeks') + ylab('Survival Probability') + ggtitle('Survival Probabilities of Shows by Wikipedia Category Breakdown')
+
+```
+
+
+```{r Proportional Hazard Model}
+#Proportional hazard model
+
+#Making Tony season variable factor Y/N values
+
+
+df$Tony.Season <- as.factor(df$Tony.Season)
+df$Tony_yn <- as.factor(df$Tony_yn)
+df$Category<-as.factor(df$Category)
+fit.coxph <- coxph(surv_object ~  Capacity.... + Performances+Sentimentality + Grand.Means.GT + Tony_yn +Category +First.Mean.GT +Tony.Season,
+                   data = df)
+fit.coxph
+#summary(fit.coxph)
+ggforest(fit.coxph, data = df) + ggtitle('Cox Proportional Hazard Model Results')
+
+#High censoring
+#ggplot(df, aes(x=Censored)) + geom_histogram()
+#Rearrange variables into strata to make this significant
+```
+
+
+```{r Checking assumptions for Cox model}
+
+#PLOT THE DISTRIBUTION OF SURVIVAL RATES OVER TIME
+#plot(survfit(mod.allison), ylim=c(0.7, 1), xlab="Weeks",
+    #ylab="Proportion Not Rearrested")
+
+
+cox.zph(fit.coxph)
+```
+
+```{r Model without the non proportional covariates}
+fit.coxph2 <- coxph(surv_object ~   Sentimentality + Grand.Means.GT + Tony_yn +Category +Tony.Season,
+                   data = df)
+
+cox.zph(fit.coxph)
+```
+
