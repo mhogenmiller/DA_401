@@ -10,6 +10,8 @@ How do online media outlets responses relate to the longevity of Broadway musica
 
 ### There are three main hypotheses in accordance with the research question. ###
 
+Each hyposthesis is explained below, along with whether or not it was supported by this study.
+
 Hypothesis 1: Shows with positive Wikipedia synopses will have lower chances of failure than shows with negative or neutral synopses. (Supported) 
 
 Hypothesis 2: The more positive shows’ Google headlines are overall, the less chance of failure the show will have. (Not supported)
