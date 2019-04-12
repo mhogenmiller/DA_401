@@ -1,6 +1,6 @@
 # DA_401
 
-## Consumers’ Online Experiences with Broadway Musicals: Introducing New Engagement Variables to A Cox Proportional Hazard Model of Show Survival Analysis
+## Consumers’ Online Experiences with Broadway Musicals: Introducing New Engagement Variables to A Cox Proportional Hazard Model for Show Survival Analysis
  ##
 
 This project brings together data about the attendance rates, number of performances, and search and news history of Broadway musicals to study how they contribute to show lonevity. The novely of the project lies in the fact that no studies have explored the public search behavior in relation to the survival time of shows and analyzed the media resources used here with the samemethods.
@@ -24,7 +24,7 @@ Hypothesis 5: Winning Tony awards in major award categories will decrease shows�
 
 
 
-Takeaways from this study
+### Takeaways from this study ###
 *      Assessing the public’s interest with shows through search behavior and the materials available to read about shows provided new insights into the importance of such variables in show survival analyses
 *     Unlike past studies, this study found that winning Tony awards does not significantly decrease the hazard rate of  musical  failure
 *      There are many limitations to data analysis in the field of Broadway both due to limited databases and variety of available variable endpoints
