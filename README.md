@@ -5,10 +5,10 @@
 
 This project brings together data about the attendance rates, number of performances, and search and news history of Broadway musicals to study how they contribute to show lonevity. The novely of the project lies in the fact that no studies have explored the public search behavior in relation to the survival time of shows and analyzed the media resources used here with the samemethods.
 
-*The primary research question in this study is:* 
+### The primary research question in this study is: ###
 How do online media outlets responses relate to the longevity of Broadway musicals?  
 
-There are three main hypotheses in accordance with the research question.
+### There are three main hypotheses in accordance with the research question. ###
 
 Hypothesis 1: Shows with positive Wikipedia synopses will have lower chances of failure than shows with negative or neutral synopses. (Supported) 
 
