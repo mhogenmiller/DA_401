@@ -28,14 +28,14 @@ df=df[!(df$Category==0),]
 df=na.omit(df, cols="LogWeeks")
 
 #Changing censoring
-df$Censored <- ifelse(df$Censored== 0,1, 0)
+#df$Censored <- ifelse(df$Censored== 0,1, 0)
 
-
+count(df$Censored==0)
 
 colnames(df)[colnames(df)=="Grand.Mean"] <- "Grand.Means.GT"
 colnames(df)[colnames(df)=="First.Week"] <- "First.Mean.GT"
 colnames(df)[colnames(df)=="Capacity..."] <- "Avg % Capacity Filled"
-colnames(df)
+
 
 ```
 
