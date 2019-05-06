@@ -31,10 +31,10 @@ df$Tony_yn <- ifelse(df$total== 0,0, 1)
 table(df$Category)
 
 
-colnames(df)[colnames(df)=="Grand.Mean"] <- "Grand Google Searches"
-colnames(df)[colnames(df)=="First.Week"] <- "Week 1 Google Searches"
+colnames(df)[colnames(df)=="Grand.Mean"] <- "Grand_Google_Searches"
+colnames(df)[colnames(df)=="First.Week"] <- "Week_1_Google_Searches"
 colnames(df)[colnames(df)=="Capacity..."] <- "Avg % Capacity Filled"
-colnames(df)[colnames(df)=="Sentimentality"]<-"Google Headline Sentiment"
+colnames(df)[colnames(df)=="Sentimentality"]<-"Google_Headline_Sentiment"
 colnames(df)[colnames(df)=="Tony_yn"]<-"Tony_Win"
 colnames(df)[colnames(df)=="Tony.Season"]<-"Tony_Eligibility"
 
@@ -245,6 +245,87 @@ ggsurv3
 
 
 
+```
+
+
+```{r}
+#Mutating a variable to make Google Searches discrete
+
+library(gtools)
+#Grand Mean
+summary(df$Grand_Google_Searches)
+df2<- mutate(df2, 'GTquant'= ifelse(Grand_Google_Searches <= 14.29, 0, ifelse(Grand_Google_Searches > 14.29 & Grand_Google_Searches <= 29.78, 1, ifelse(Grand_Google_Searches > 29.78 & Grand_Google_Searches <= 46.37, 2,3))))
+
+
+#Frist Week Mean
+
+summary(df$Week_1_Google_Searches)
+df2<- mutate(df2, 'GTfirstquant'= ifelse(Grand_Google_Searches <= 14.36, 0, ifelse(Grand_Google_Searches > 14.36 & Grand_Google_Searches <= 32.29, 1, ifelse(Grand_Google_Searches > 32.29 & Grand_Google_Searches <= 53.4, 2,3))))
+
+#Google Headline Sentiment
+
+summary(df$Google_Headline_Sentiment)
+df2<- mutate(df2, 'GH2'= ifelse(Grand_Google_Searches <= 0.06782,0,1)
+
+
+```
+
+```{r}
+
+#Kaplan Meier curves for Google search metrics
+
+#Grand Mean
+
+#create survival object
+surv_object <- Surv(time = df2$Weeks, event = df2$Censored)
+surv_object
+
+#Fitting the survival object to a Kaplan-Meir curve
+fit1 <- survfit(surv_object ~ GTquant, data = df2)
+summary(fit1)
+
+#plot of the survival probability over time for Tony v. No Tonys
+ggsurv4<- ggsurvplot(fit1, data = df2,legend=c(.75,.8), palette = c("#FF0000","#000000",	"#DAA520","green"), legend.title = "Legend", legend.labs=c('Lowest','Middle', 'High','Top'), font.title=c(16), font.legend=c(16), font.x=c(16) , font.y=c(16)) +  xlab(' Number of Weeks') + ylab('Survival Probability') + ggtitle('Survival Probabilities Over Time Relative to Grand Google Search Score')
+
+ggsurv4$plot <- ggsurv4$plot +  ggplot2::annotate("text",  x = 310, y = 0.58, label = "p-value .63", size = 5)
+ggsurv4
+             
+      
+
+#First Week Mean
+
+#create survival object
+surv_object <- Surv(time = df2$Weeks, event = df2$Censored)
+surv_object
+
+#Fitting the survival object to a Kaplan-Meir curve
+fit1 <- survfit(surv_object ~ GTfirstquant, data = df2)
+summary(fit1)
+
+#plot of the survival probability over time for Tony v. No Tonys
+ggsurv5<- ggsurvplot(fit1, data = df2,legend=c(.75,.8), palette = c("#FF0000","#000000",	"#DAA520","green"), legend.title = "Legend", legend.labs=c('Lowest','Middle', 'High','Top'), font.title=c(15), font.legend=c(16), font.x=c(16) , font.y=c(16)) +  xlab(' Number of Weeks') + ylab('Survival Probability') + ggtitle('Survival Probabilities Over Time Relative to Week 1 Google Searches')
+
+ggsurv5$plot <- ggsurv5$plot +  ggplot2::annotate("text",  x = 310, y = 0.58, label = "p-value .14", size = 5)
+ggsurv5
+             
+```
+```{r}
+#Google Headlines 
+
+#create survival object
+surv_object <- Surv(time = df2$Weeks, event = df2$Censored)
+surv_object
+
+#Fitting the survival object to a Kaplan-Meir curve
+fit1 <- survfit(surv_object ~ GH2, data = df2)
+summary(fit1)
+
+#plot of the survival probability over time for Tony v. No Tonys
+ggsurv6<- ggsurvplot(fit1, data = df2,legend=c(.75,.8), palette = c("#FF0000","#000000",	"#DAA520","green"), legend.title = "Legend", legend.labs=c('Lowest','Middle', 'High','Top'), font.title=c(15), font.legend=c(16), font.x=c(16) , font.y=c(16)) +  xlab(' Number of Weeks') + ylab('Survival Probability') + ggtitle('Survival Probabilities Over Time Relative to Week 1 Google Searches')
+
+ggsurv6$plot <- ggsurv6$plot +  ggplot2::annotate("text",  x = 310, y = 0.58, label = "p-value .14", size = 5)
+ggsurv6
+          
 ```
 
 
