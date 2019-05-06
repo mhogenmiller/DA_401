@@ -8,7 +8,7 @@ This project brings together data about the attendance rates, number of performa
 ### The primary research question in this study is: ###
 How do online media outlets responses relate to the longevity of Broadway musicals?  
 
-### There are three main hypotheses in accordance with the research question. ###
+### There are five main hypotheses in accordance with the research question. ###
 
 Each hyposthesis is explained below, along with whether or not it was supported by this study.
 
