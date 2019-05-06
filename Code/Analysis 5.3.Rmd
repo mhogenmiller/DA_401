@@ -176,7 +176,12 @@ fit1 <- survfit(surv_object ~ Tony_yn, data = df)
 summary(fit1)
 
 #plot of the survival probability over time for Tony v. No Tonys
-ggsurvplot(fit1, data = df, legend=c(.8,.8),pval = NULL, legend.title = "Legend", legend.labs=c('Tony Wins','No Tony Wins'), font.title=c(18), font.legend=c(16), font.x=c(18), font.y=c(18), font.main=c(18)) + xlab(' Number of Weeks') + ylab('Survival Probability') + ggtitle('Survival Probabilities of Shows With and Without Tonys')  + annotate("text", x = 300, y = 0.50, label = "The p-value is: 0.00017")
+ggsurv<-ggsurvplot(fit1, data = df, legend=c(.8,.8),pval = NULL, legend.title = "Legend", legend.labs=c('No Tony Wins','Tony Wins'), font.title=c(18), font.legend=c(18), font.x=c(18), font.y=c(18), font.main=c(18)) + xlab(' Number of Weeks') + ylab('Survival Probability') + ggtitle('Survival Probabilities Over Time Relative to Tony Wins')  
+
+
+ggsurv$plot <- ggsurv$plot +  ggplot2::annotate("text",  x = 320, y = 0.65, label = "p-value: 0.00017", size = 5)
+
+ggsurv
 
 ```
 
